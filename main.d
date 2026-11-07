@@ -1,34 +1,48 @@
 import std.stdio;
 import std.string;
+import std.algorithm;
+import std.conv;
 
 void main(string[] args)
 {
     if(args.length < 2)
     {
         writeln("Правильное использование: rutoen <текст>");
-        writeln("Пример: rutoen ghbdtn");
         return;
     }
 
     string input = args[1 .. $].join(" ");
 
-    string en = "qwertyuiop[]asdfghjkl;'zxcvbnm,./.";
-    string ru = "йцукенгшщзхъфывапролджэячсмитьбю.,";
+    dchar[] en_low = "qwertyuiop[]asdfghjkl;'zxcvbnm,./".to!(dchar[]);
+    dchar[] ru_low = "йцукенгшщзхъфывапролджэячсмитьбю.".to!(dchar[]);
 
-    char[] result;
+    dchar[] en_up = "QWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>?".to!(dchar[]);
+    dchar[] ru_up = "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,".to!(dchar[]);
 
-    foreach(char c; input)
+    dchar[] result;
+
+    bool isRussian = input.any!(c => c >= 'а' && c <= 'я' || c == 'ё' || c >= 'А' && c <= 'Я' || c == 'Ё');
+
+    foreach(dchar c; input)
     {
-        auto index = ru.indexOf(c);
+        long index = -1;
 
-        if(index != -1)
-        {
-            result ~= en[index];
+        if (isRussian) {
+            index = ru_low.indexOf(c);
+            if (index != -1) { result ~= en_low[index]; continue; }
+
+            index = ru_up.indexOf(c);
+            if (index != -1) { result ~= en_up[index]; continue; }
+        } else {
+            index = en_low.indexOf(c);
+            if (index != -1) { result ~= ru_low[index]; continue; }
+
+            index = en_up.indexOf(c);
+            if (index != -1) { result ~= ru_up[index]; continue; }
         }
-        else
-        {
-            result ~= c;
-        }
+
+        result ~= c;
     }
-    writeln(result);
+
+    writeln(result.to!(string));
 }
